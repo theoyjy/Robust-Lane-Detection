@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+/CUList
+/data
+/driver_*
+/save
+/LaneDetectionCode/data
+/pretrained
+/train_index
+*.zip

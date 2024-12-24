@@ -1,3 +1,4 @@
+import os
 from torch.utils.data import Dataset
 from PIL import Image
 import torch
@@ -8,6 +9,8 @@ from sklearn import preprocessing
 
 def readTxt(file_path):
     img_list = []
+    # print file full path
+    print('file full path:', os.path.abspath(file_path))
     with open(file_path, 'r') as file_to_read:
         while True:
             lines = file_to_read.readline()
@@ -30,6 +33,10 @@ class RoadSequenceDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path_list = self.img_list[idx]
+        #  print the values of img_path_list and idx  
+        # print('img_path_list:', img_path_list)
+        # print('idx:', idx)        
+
         data = Image.open(img_path_list[4])
         label = Image.open(img_path_list[5])
         data = self.transforms(data)
@@ -40,7 +47,8 @@ class RoadSequenceDataset(Dataset):
 class RoadSequenceDatasetList(Dataset):
 
     def __init__(self, file_path, transforms):
-
+        # print current application path
+        # print('current application path:', os.path.abspath('.'))
         self.img_list = readTxt(file_path)
         self.dataset_size = len(self.img_list)
         self.transforms = transforms

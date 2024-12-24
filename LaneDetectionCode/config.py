@@ -12,11 +12,16 @@ data_loader_numworkers = 8
 class_num = 2
 
 # path
-train_path = "./data/train_index.txt"
-val_path = "./data/val_index.txt"
-test_path = "./data/test_index_demo.txt"
-save_path = "./save/result/"
-pretrained_path='./pretrained/unetlstm.pth'
+# train_path = "./data/train_index.txt"
+# val_path = "./data/val_index.txt"
+# test_path = "./data/test_index_demo.txt"
+# save_path = "./save/result/"
+
+train_path = "./CUList/train.txt"
+val_path = "./CUList/val_resized.txt"
+test_path = "./CUList/test_resized.txt"
+save_path = "./save/CULane_result/"
+pretrained_path='./pretrained/unet.pth'
 
 # weight
 class_weight = [0.02, 1.02]
@@ -24,7 +29,7 @@ class_weight = [0.02, 1.02]
 def args_setting():
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch UNet-ConvLSTM')
-    parser.add_argument('--model',type=str, default='UNet-ConvLSTM',help='( UNet-ConvLSTM | SegNet-ConvLSTM | UNet | SegNet | ')
+    parser.add_argument('--model',type=str, default='UNet',help='( UNet-ConvLSTM | SegNet-ConvLSTM | UNet | SegNet | ')
     parser.add_argument('--batch-size', type=int, default=15, metavar='N',
                         help='input batch size for training (default: 10)')
     parser.add_argument('--test-batch-size', type=int, default=1, metavar='N',

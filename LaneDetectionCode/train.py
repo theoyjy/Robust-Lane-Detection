@@ -14,6 +14,8 @@ def train(args, epoch, model, train_loader, device, optimizer, criterion):
         data, target = sample_batched['data'].to(device), sample_batched['label'].type(torch.LongTensor).to(device) # LongTensor
         optimizer.zero_grad()
         output = model(data)
+        if isinstance(output, tuple):
+            output = output[0]
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()

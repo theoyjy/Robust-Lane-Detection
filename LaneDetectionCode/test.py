@@ -12,20 +12,21 @@ import cv2
 def output_result(model, test_loader, device):
     model.eval()
     k = 0
-    feature_dic=[]
+    # feature_dic=[]
     with torch.no_grad():
         for sample_batched in test_loader:
             k+=1
             print(k)
             data, target = sample_batched['data'].to(device), sample_batched['label'].type(torch.LongTensor).to(device)
-            output,feature = model(data)
-            feature_dic.append(feature)
+            # output,feature = model(data)
+            output = model(data)
+            # feature_dic.append(feature)
             pred = output.max(1, keepdim=True)[1]
             img = torch.squeeze(pred).cpu().unsqueeze(2).expand(-1,-1,3).numpy()*255
             img = Image.fromarray(img.astype(np.uint8))
 
             data = torch.squeeze(data).cpu().numpy()
-            if args.model == 'SegNet-ConvLSTM' or 'UNet-ConvLSTM':
+            if args.model == 'SegNet-ConvLSTM' or args.model == 'UNet-ConvLSTM':
                 data = np.transpose(data[-1], [1, 2, 0]) * 255
             else:
                 data = np.transpose(data, [1, 2, 0]) * 255
@@ -53,7 +54,8 @@ def evaluate_model(model, test_loader, device, criterion):
         for sample_batched in test_loader:
             i+=1
             data, target = sample_batched['data'].to(device), sample_batched['label'].type(torch.LongTensor).to(device)
-            output, feature = model(data)
+            # output, feature = model(data)
+            output = model(data)
             pred = output.max(1, keepdim=True)[1]  # 返回两个，一个是最大值另一个是最大值索引
             img = torch.squeeze(pred).cpu().numpy()*255
             lab = torch.squeeze(target).cpu().numpy()*255
@@ -73,21 +75,28 @@ def evaluate_model(model, test_loader, device, criterion):
             lab = lab.astype(np.int32)
             label_precision = label_precision.astype(np.int32)
             pred_recall = pred_recall.astype(np.int32)
+
             a = len(np.nonzero(img*label_precision)[1])
             b = len(np.nonzero(img)[1])
-            if b==0:
-                error=error+1
+            c = len(np.nonzero(pred_recall*lab)[1])
+            d = len(np.nonzero(lab)[1])
+
+            if b <= 0:
+                error = error+1
                 continue
             else:
                 precision += float(a/b)
-            c = len(np.nonzero(pred_recall*lab)[1])
-            d = len(np.nonzero(lab)[1])
-            if d==0:
+
+            if d<=0:
                 error = error + 1
                 continue
             else:
                 recall += float(c / d)
-            F1_measure=(2*precision*recall)/(precision+recall)
+
+            if precision + recall > 0:
+                F1_measure=(2*precision*recall)/(precision+recall)
+            else:
+                F1_measure = 0
 
     test_loss /= (len(test_loader.dataset) / args.test_batch_size)
     test_acc = 100. * int(correct) / (len(test_loader.dataset) * config.label_height * config.label_width)
@@ -128,7 +137,7 @@ if __name__ == '__main__':
     op_tranforms = transforms.Compose([transforms.ToTensor()])
 
     # load data for batches, num_workers for multiprocess
-    if args.model == 'SegNet-ConvLSTM' or 'UNet-ConvLSTM':
+    if args.model == 'SegNet-ConvLSTM' or args.model == 'UNet-ConvLSTM':
         test_loader=torch.utils.data.DataLoader(
             RoadSequenceDatasetList(file_path=config.test_path, transforms=op_tranforms),
             batch_size=args.test_batch_size, shuffle=False, num_workers=1)
@@ -149,6 +158,6 @@ if __name__ == '__main__':
     model.load_state_dict(model_dict)
 
     # output the result pictures
-    output_result(model, test_loader, device)
+    # output_result(model, test_loader, device)
     # calculate the values of accuracy, precision, recall, f1_measure
     evaluate_model(model, test_loader, device, criterion)
